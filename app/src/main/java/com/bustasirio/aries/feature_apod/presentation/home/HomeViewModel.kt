@@ -23,6 +23,7 @@ class HomeViewModel @Inject constructor(
     var apodsState = mutableStateOf<List<Apod>>(listOf())
     var errorState = mutableStateOf("")
     var isLoading = mutableStateOf(false)
+    var page = 0
 
     private var endDate = org.joda.time.LocalDate.now()
     private var startDate = endDate.minusDays(APOD_PAGE_SIZE)
@@ -30,6 +31,7 @@ class HomeViewModel @Inject constructor(
     init { getApods() }
 
     fun getApods() {
+        page++
         getApodList(
             ESL,
             "$startDate",
@@ -56,6 +58,5 @@ class HomeViewModel @Inject constructor(
 
         apodsState.value += resultApods
         isLoading.value = false
-        Log.d("tagHomeVM", "${apodsState.value.size}")
     }
 }

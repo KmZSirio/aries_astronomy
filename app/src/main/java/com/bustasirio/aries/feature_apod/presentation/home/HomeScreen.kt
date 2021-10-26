@@ -40,9 +40,7 @@ fun HomeScreen(
                 .fillMaxSize()
         ) {
             itemsIndexed(apodsState) { i, apod ->
-                if (i == 0) {
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
+                if (i == 0) Spacer(modifier = Modifier.height(10.dp))
                 ApodListItem(
                     apod = apod,
                     onItemClick = {
@@ -51,12 +49,8 @@ fun HomeScreen(
                     }
                 )
                 if (i == apodsState.size - 1) Spacer(modifier = Modifier.height(10.dp))
-                if (i != apodsState.size - 1) Divider(
-                    color = MaterialTheme.colors.onBackground
-                )
-                if (i == apodsState.size - 2 && !isLoading) {
-                    viewModel.getApods()
-                }
+                if (i != apodsState.size - 1) Divider(color = MaterialTheme.colors.onBackground)
+                if (i == apodsState.size - 2 && !isLoading) viewModel.getApods()
             }
         }
         if (errorState.isNotBlank()) {
@@ -70,6 +64,15 @@ fun HomeScreen(
                     .align(Alignment.Center)
             )
         }
-        if (isLoading) CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        if (isLoading && viewModel.page == 1) CircularProgressIndicator(
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier.align(Alignment.Center)
+        )
+        if (isLoading && viewModel.page > 1) CircularProgressIndicator(
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(10.dp)
+        )
     }
 }

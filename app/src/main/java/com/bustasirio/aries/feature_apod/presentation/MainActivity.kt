@@ -28,12 +28,11 @@ class MainActivity : ComponentActivity() {
                     composable(Screen.HomeScreen.route) {
                         HomeScreen(navController = navController)
                     }
-                    composable(Screen.ApodDetailScreen.route) { backStackEntry ->
-//                        val apod = backStackEntry.savedStateHandle.get<Apod>("apod")
+                    composable(Screen.ApodDetailScreen.route) {
                         val apod =
                             navController.previousBackStackEntry?.savedStateHandle?.get<Apod>("apod")
                         apod?.let {
-                            ApodDetailScreen(navController = navController, apod = it)
+                            ApodDetailScreen(apod = it)
                         }
                     }
                 }

@@ -1,17 +1,14 @@
 package com.bustasirio.aries.feature_apod.presentation.home.components
 
-import android.graphics.Paint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement.Start
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
-import androidx.compose.ui.Alignment.Companion.Start
 import androidx.compose.ui.unit.dp
 import com.bustasirio.aries.feature_apod.domain.model.Apod
 import androidx.compose.ui.Modifier
@@ -89,8 +86,8 @@ fun ApodListItem(
         }
         if (!apod.copyright.isNullOrEmpty()) {
             Text(
-                text = "© " + apod.copyright.trim(),
-                style = MaterialTheme.typography.body2,
+                text = "© ${apod.copyright.trim()}",
+                style = MaterialTheme.typography.caption,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colors.onBackground,
