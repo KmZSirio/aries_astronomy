@@ -1,10 +1,12 @@
 package com.bustasirio.aries.feature_apod.presentation.home.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -26,11 +28,20 @@ fun ApodListItem(
     apod: Apod,
     onItemClick: (Apod) -> Unit
 ) {
+
+    val isImage = apod.mediaType == "image"
+
+    val img = rememberImagePainter(
+        if (isImage) apod.url
+        else apod.thumbnailUrl
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onItemClick(apod) }
-            .padding(vertical = 10.dp),
+            .padding(vertical = 10.dp)
+            .background(MaterialTheme.colors.background),
         horizontalAlignment = CenterHorizontally
     ) {
         Row(
@@ -64,26 +75,15 @@ fun ApodListItem(
                     .align(CenterVertically)
             )
         }
-        if (apod.mediaType == "image") {
-            val painter = rememberImagePainter(apod.url)
-            Image(
-                painter = painter,
-                contentDescription = "Astronomic picture of the day",
-                contentScale = ContentScale.FillHeight,
-                modifier = Modifier
-                    .requiredHeight(300.dp)
-            )
-        }
-        if (apod.mediaType == "video") {
-            val painter = rememberImagePainter(apod.thumbnailUrl)
-            Image(
-                painter = painter,
-                contentDescription = "Video thumbnail",
-                contentScale = ContentScale.FillHeight,
-                modifier = Modifier
-                    .requiredHeight(300.dp)
-            )
-        }
+
+        Image(
+            painter = img,
+            contentDescription = "Astronomic picture of the day",
+            contentScale = ContentScale.FillHeight,
+            modifier = Modifier
+                .requiredHeight(300.dp)
+        )
+
         if (!apod.copyright.isNullOrEmpty()) {
             Text(
                 text = "© ${apod.copyright.trim()}",
