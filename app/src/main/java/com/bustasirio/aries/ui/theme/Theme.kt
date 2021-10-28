@@ -1,4 +1,4 @@
-package com.bustasirio.aries.feature_apod.presentation.ui.theme
+package com.bustasirio.aries.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
@@ -13,7 +13,7 @@ private val DarkColorPalette = darkColors(
     secondaryVariant = AccentDarker,
 
     background = DarkBackground,
-    surface = DarkBlue,
+    surface = DarkDarkerBackground,
     onPrimary = DarkText,
     onSecondary = DarkText,
     onBackground = DarkText,
@@ -30,7 +30,7 @@ private val LightColorPalette = lightColors(
     secondaryVariant = AccentDarker,
 
     background = LightBackground,
-    surface = LightBlue,
+    surface = LightDarkerBackground,
     onPrimary = LightText,
     onSecondary = LightText,
     onBackground = LightText,

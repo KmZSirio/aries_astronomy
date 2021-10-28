@@ -169,7 +169,7 @@ fun ApodDetailScreen(
                     .padding(start = 15.dp, end = 15.dp, bottom = 10.dp)
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }

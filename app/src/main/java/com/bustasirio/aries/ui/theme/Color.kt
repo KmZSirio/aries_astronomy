@@ -1,4 +1,4 @@
-package com.bustasirio.aries.feature_apod.presentation.ui.theme
+package com.bustasirio.aries.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -6,10 +6,14 @@ val Black = Color(0xff000000)
 val White = Color(0xffFFFFFF)
 
 val DarkBackground = Color(0xff171717)
+val DarkDarkerBackground = Color(0xff101010)
 val DarkBlue = Color(0xff586c76)
 val DarkText = Color(0xffEEEEEE)
 
+val MidBackground = Color(0xff838383)
+
 val LightBackground = Color(0xffEEEEEE)
+val LightDarkerBackground = Color(0xffE8E8E8)
 val LightBlue = Color(0xff93b5c6)
 val LightText = Color(0xff171717)
 

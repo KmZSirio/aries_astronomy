@@ -1,7 +1,6 @@
 package com.bustasirio.aries.feature_apod.presentation.home
 
 import android.app.DatePickerDialog
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,11 +21,10 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
-import com.bustasirio.aries.feature_apod.presentation.Screen
+import com.bustasirio.aries.Screen
 import com.bustasirio.aries.feature_apod.presentation.home.components.ApodListItem
-import com.bustasirio.aries.feature_apod.presentation.ui.theme.White
+import com.bustasirio.aries.ui.theme.White
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.*
 
 @ExperimentalCoilApi
