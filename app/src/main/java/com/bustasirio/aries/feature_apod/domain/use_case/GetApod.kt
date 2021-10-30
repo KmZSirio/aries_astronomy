@@ -1,6 +1,5 @@
 package com.bustasirio.aries.feature_apod.domain.use_case
 
-import android.util.Log
 import com.bustasirio.aries.common.util.Resource
 import com.bustasirio.aries.feature_apod.domain.model.Apod
 import com.bustasirio.aries.feature_apod.domain.repository.ApodRepository

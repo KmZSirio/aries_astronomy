@@ -31,3 +31,6 @@ val LightInformation = Color(0xff17a2b8)
 val LightSuccess = Color(0xff28a745)
 val LightWarning = Color(0xffffc107)
 val LightError = Color(0xffdc3545)
+
+val SavedRed = Color(0xffFF0000)
+val NotSavedGrey = Color(0xff888888)

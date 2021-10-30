@@ -101,7 +101,8 @@ fun HomeScreen(
                         apod = apod,
                         onItemClick = {
                             navController.currentBackStackEntry?.savedStateHandle?.set("apod", it)
-                            navController.navigate(Screen.ApodDetailScreen.route)
+                            navController.navigate(Screen.ApodDetailScreen.route +
+                                "?date=${apod.date}")
                         }
                     )
                     if (i == apodsState.size - 1) Spacer(modifier = Modifier.height(10.dp))

@@ -1,6 +1,5 @@
 package com.bustasirio.aries.feature_apod.presentation.home
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,8 +8,7 @@ import com.bustasirio.aries.common.util.Constants.APOD_PAGE_SIZE
 import com.bustasirio.aries.common.util.ESL
 import com.bustasirio.aries.common.util.Resource
 import com.bustasirio.aries.feature_apod.domain.model.Apod
-import com.bustasirio.aries.feature_apod.domain.use_case.GetApod
-import com.bustasirio.aries.feature_apod.domain.use_case.GetApodList
+import com.bustasirio.aries.feature_apod.domain.use_case.ApodUsesCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -18,9 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getApodList: GetApodList,
-    private val getApod: GetApod
-) : ViewModel() {
+    private val usesCases: ApodUsesCases
+): ViewModel() {
 
     var apodState = mutableStateOf<Apod?>(null)
     var snackbarErrorState = mutableStateOf("")
@@ -38,7 +35,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getApod(date: String) {
-        getApod(
+        usesCases.getApod(
             ESL,
             date,
             true
@@ -62,7 +59,7 @@ class HomeViewModel @Inject constructor(
 
     fun getApods() {
         page++
-        getApodList(
+        usesCases.getApodList(
             ESL,
             "$startDate",
             "$endDate",

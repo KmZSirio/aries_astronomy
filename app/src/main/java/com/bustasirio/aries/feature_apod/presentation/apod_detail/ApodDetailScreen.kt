@@ -1,16 +1,13 @@
 package com.bustasirio.aries.feature_apod.presentation.apod_detail
 
-import android.util.Log
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import com.bustasirio.aries.feature_apod.domain.model.Apod
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
@@ -22,16 +19,24 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
+import com.bustasirio.aries.R
+import com.bustasirio.aries.ui.theme.DarkInformation
+import com.bustasirio.aries.ui.theme.LightInformation
+import com.bustasirio.aries.ui.theme.NotSavedGrey
+import com.bustasirio.aries.ui.theme.SavedRed
+import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -39,7 +44,8 @@ import kotlin.math.sin
 @ExperimentalCoilApi
 @Composable
 fun ApodDetailScreen(
-    apod: Apod
+    apod: Apod,
+    viewModel: ApodDetailViewModel = hiltViewModel()
 ) {
 
     var zoom by remember { mutableStateOf(1f) }
@@ -50,10 +56,17 @@ fun ApodDetailScreen(
 
     val img = rememberImagePainter(
         if (isImage) apod.url
-        else apod.thumbnailUrl
+        else apod.thumbnailUrl,
+        builder = {
+            crossfade(true)
+        }
     )
+    val painterState = img.state
 
     val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+
+    val savedState = viewModel.savedState
 
     Scaffold(
         modifier = Modifier
@@ -92,50 +105,71 @@ fun ApodDetailScreen(
                     .align(Alignment.End)
             )
 
-            Image(
-                modifier = Modifier
-                    .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                    .padding(vertical = 5.dp)
-                    .zIndex(1f)
-                    .graphicsLayer(
-                        scaleX = maxOf(1f, minOf(3f, zoom)),
-                        scaleY = maxOf(1f, minOf(3f, zoom))
+            when (painterState) {
+                is ImagePainter.State.Loading -> {
+                    Box(modifier = Modifier
+                        .requiredHeight(300.dp)
+                        .align(CenterHorizontally)
+                    ) {
+                        LinearProgressIndicator(
+                            Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+                is ImagePainter.State.Error -> {
+                    Icon(
+                        imageVector = Icons.Default.Error,
+                        tint = MaterialTheme.colors.error,
+                        contentDescription = stringResource(R.string.error)
                     )
-                    .pointerInput(Unit) {
-                        detectTransformGestures(
-                            onGesture = { _, pan, gestureZoom, _ ->
+                }
+                else -> {
+                    Image(
+                        modifier = Modifier
+                            .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
+                            .padding(vertical = 5.dp)
+                            .zIndex(1f)
+                            .graphicsLayer(
+                                scaleX = maxOf(1f, minOf(3f, zoom)),
+                                scaleY = maxOf(1f, minOf(3f, zoom))
+                            )
+                            .pointerInput(Unit) {
+                                detectTransformGestures(
+                                    onGesture = { _, pan, gestureZoom, _ ->
 
-                                zoom *= gestureZoom
-                                if (zoom < 1f) zoom = 1f
+                                        zoom *= gestureZoom
+                                        if (zoom < 1f) zoom = 1f
 
-                                val x = pan.x * zoom
-                                val y = pan.y * zoom
+                                        val x = pan.x * zoom
+                                        val y = pan.y * zoom
 
-                                if (zoom < 1.2f) {
-                                    offsetX = 0f
-                                    offsetY = 0f
-                                } else {
-                                    offsetX += (x * cos(0f) - y * sin(0f))
-                                    offsetY += (x * sin(0f) + y * cos(0f))
-                                }
+                                        if (zoom < 1.2f) {
+                                            offsetX = 0f
+                                            offsetY = 0f
+                                        } else {
+                                            offsetX += (x * cos(0f) - y * sin(0f))
+                                            offsetY += (x * sin(0f) + y * cos(0f))
+                                        }
+                                    }
+                                )
                             }
-                        )
-                    }
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onDoubleTap = {
-                                zoom = 1f
-                                offsetX = 0f
-                                offsetY = 0f
+                            .pointerInput(Unit) {
+                                detectTapGestures(
+                                    onDoubleTap = {
+                                        zoom = 1f
+                                        offsetX = 0f
+                                        offsetY = 0f
+                                    }
+                                )
                             }
-                        )
-                    }
-                    .fillMaxWidth()
-                    .requiredHeightIn(if (isImage) 150.dp else 280.dp, 700.dp),
-                contentDescription = "Astronomic picture of the day",
-                contentScale = ContentScale.Fit,
-                painter = img
-            )
+                            .fillMaxWidth()
+                            .requiredHeightIn(if (isImage) 150.dp else 280.dp, 700.dp),
+                        contentDescription = "Astronomic picture of the day",
+                        contentScale = ContentScale.Fit,
+                        painter = img
+                    )
+                }
+            }
 
             if (!apod.copyright.isNullOrEmpty()) {
                 Text(
@@ -150,8 +184,47 @@ fun ApodDetailScreen(
                 )
             }
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.Default.FileDownload,
+                        tint = if (isSystemInDarkTheme()) DarkInformation else LightInformation,
+                        contentDescription = stringResource(R.string.download),
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+
+                IconToggleButton(
+                    checked = savedState.value,
+                    onCheckedChange = {
+                        savedState.value = it
+                        if (it) scope.launch { viewModel.insertApod(apod) }
+                        else scope.launch { viewModel.deleteApod() }
+                    }
+                ) {
+                    if (savedState.value) Icon(
+                        imageVector = Icons.Default.Favorite,
+                        tint = SavedRed,
+                        contentDescription = stringResource(R.string.saved),
+                        modifier = Modifier.size(30.dp)
+                    )
+                    else Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        tint = NotSavedGrey,
+                        contentDescription = stringResource(R.string.not_saved),
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+
             Text(
-                text = "Explanation",
+                text = stringResource(R.string.explanation),
                 style = MaterialTheme.typography.subtitle1,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Start,

@@ -1,17 +1,17 @@
-package com.bustasirio.aries.feature_apod.presentation.home.components
+package com.bustasirio.aries.feature_apod.presentation.saved_apods.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.unit.dp
@@ -27,19 +27,20 @@ import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.bustasirio.aries.R
 import com.bustasirio.aries.common.formatDate
+import com.bustasirio.aries.feature_apod.domain.model.SavedApod
 
 @ExperimentalCoilApi
 @Composable
-fun ApodListItem(
-    apod: Apod,
+fun SavedApodListItem(
+    savedApod: SavedApod,
     onItemClick: (Apod) -> Unit
 ) {
 
-    val isImage = apod.mediaType == "image"
+    val isImage = savedApod.apod.mediaType == "image"
 
     val img = rememberImagePainter(
-        if (isImage) apod.url
-        else apod.thumbnailUrl,
+        if (isImage) savedApod.apod.url
+        else savedApod.apod.thumbnailUrl,
         builder = {
             crossfade(true)
         }
@@ -49,7 +50,7 @@ fun ApodListItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClick(apod) }
+            .clickable { onItemClick(savedApod.apod) }
             .padding(vertical = 10.dp)
             .background(MaterialTheme.colors.background),
         horizontalAlignment = CenterHorizontally
@@ -62,7 +63,7 @@ fun ApodListItem(
                 .padding(horizontal = 20.dp)
         ) {
             Text(
-                text = apod.title,
+                text = savedApod.apod.title,
                 style = MaterialTheme.typography.h6,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -74,7 +75,7 @@ fun ApodListItem(
             )
 
             Text(
-                text = formatDate(apod.date),
+                text = formatDate(savedApod.apod.date),
                 style = MaterialTheme.typography.h6,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -92,7 +93,7 @@ fun ApodListItem(
                     .requiredHeight(300.dp)
                 ) {
                     LinearProgressIndicator(
-                        Modifier.align(Center)
+                        Modifier.align(Alignment.Center)
                     )
                 }
             }
@@ -114,9 +115,9 @@ fun ApodListItem(
             }
         }
 
-        if (!apod.copyright.isNullOrEmpty()) {
+        if (!savedApod.apod.copyright.isNullOrEmpty()) {
             Text(
-                text = "© ${apod.copyright.trim()}",
+                text = "© ${savedApod.apod.copyright.trim()}",
                 style = MaterialTheme.typography.caption,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
