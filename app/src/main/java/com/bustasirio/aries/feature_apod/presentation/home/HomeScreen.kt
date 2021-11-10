@@ -2,10 +2,12 @@ package com.bustasirio.aries.feature_apod.presentation.home
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -23,6 +25,8 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.bustasirio.aries.Screen
 import com.bustasirio.aries.feature_apod.presentation.home.components.ApodListItem
+import com.bustasirio.aries.ui.theme.DarkInformation
+import com.bustasirio.aries.ui.theme.LightInformation
 import com.bustasirio.aries.ui.theme.White
 import kotlinx.coroutines.launch
 import java.util.*
@@ -110,15 +114,7 @@ fun HomeScreen(
                     if (i == apodsState.size - 2 && !isLoading) viewModel.getApods()
                 }
             }
-            if (errorState.isNotBlank()) Text(
-                text = errorState,
-                color = MaterialTheme.colors.error,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .align(Alignment.Center)
-            )
+            if (errorState.isNotBlank()) ShowError(errorState)
             if (isLoading && viewModel.page == 1) CircularProgressIndicator(
                 color = MaterialTheme.colors.secondary,
                 modifier = Modifier.align(Alignment.Center)
@@ -130,8 +126,10 @@ fun HomeScreen(
                     .padding(10.dp)
             )
             if (apodState.value != null) {
-                navController.currentBackStackEntry?.savedStateHandle?.set("apod", apodState.value)
-                navController.navigate(Screen.ApodDetailScreen.route)
+                val resultApod = apodState.value
+                navController.currentBackStackEntry?.savedStateHandle?.set("apod", resultApod)
+                navController.navigate(Screen.ApodDetailScreen.route +
+                    "?date=${resultApod!!.date}")
                 apodState.value = null
             }
             if (snackbarErrorState.value.isNotBlank()) scope.launch {
@@ -140,5 +138,36 @@ fun HomeScreen(
             }
 
         }
+    }
+}
+
+@Composable
+fun ShowError(error: String) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .zIndex(1f)
+    ) {
+        Card(
+            modifier = Modifier
+                .size(300.dp, 100.dp)
+                .align(Alignment.Center),
+            shape = RoundedCornerShape(16.dp),
+            content = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colors.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
+            }
+        )
     }
 }

@@ -1,5 +1,8 @@
 package com.bustasirio.aries.common
 
+import android.webkit.MimeTypeMap
+import com.bustasirio.aries.feature_apod.domain.model.Apod
+
 fun formatDate(date: String): String {
     // * 0123-56-89
 
@@ -20,4 +23,22 @@ fun formatDate(date: String): String {
     }
 
     return date.substring(8) + " " + month
+}
+
+fun fetchMimeTypeFromUrl(url: String): String? {
+    var type: String? = null
+    try {
+        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+        }
+    } catch (e: Exception) {
+
+    }
+    return type
+}
+
+fun getUrlFromApod(apod: Apod): String {
+    return if (apod.mediaType == "image") apod.hdurl ?: apod.url
+    else  apod.thumbnailUrl!!
 }

@@ -28,13 +28,13 @@ fun OrderSection(
             )
             Spacer(modifier = Modifier.width(8.dp))
             DefaultRadioButton(
-                text = stringResource(R.string.save_date),
+                text = stringResource(R.string.date_added),
                 selected = apodOrder is ApodOrder.SaveDate,
                 onSelect = { onOrderChange(ApodOrder.SaveDate(apodOrder.orderType)) }
             )
             Spacer(modifier = Modifier.width(8.dp))
             DefaultRadioButton(
-                text = stringResource(R.string.publish_date),
+                text = stringResource(R.string.date_published),
                 selected = apodOrder is ApodOrder.PublishDate,
                 onSelect = { onOrderChange(ApodOrder.PublishDate(apodOrder.orderType)) }
             )

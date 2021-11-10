@@ -12,6 +12,7 @@ import com.bustasirio.aries.feature_apod.domain.use_case.ApodUsesCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.joda.time.DateTimeZone
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,7 +28,8 @@ class HomeViewModel @Inject constructor(
     var isLoading = mutableStateOf(false)
     var page = 0
 
-    private var endDate = org.joda.time.LocalDate.now()
+
+    private var endDate = org.joda.time.LocalDate.now(DateTimeZone.forID("America/Mexico_City"))
     private var startDate = endDate.minusDays(APOD_PAGE_SIZE)
 
     init {
@@ -77,6 +79,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getApodsSuccess(result: Resource<List<Apod>>) {
+        errorState.value = ""
         endDate = startDate.minusDays(1)
         startDate = endDate.minusDays(APOD_PAGE_SIZE)
 

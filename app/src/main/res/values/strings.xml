@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Aries Astronomy</string>
+    <string name="app_name">Aries APOD</string>
     <string name="saved_apods_title">Saved APODs</string>
     <string name="sort">Sort</string>
     <string name="error">Error</string>
@@ -7,8 +7,8 @@
     <string name="not_saved">Not saved</string>
     <string name="download">Download</string>
     <string name="title">Title</string>
-    <string name="save_date">Save date</string>
-    <string name="publish_date">Publish date</string>
+    <string name="date_added">Date added</string>
+    <string name="date_published">Date published</string>
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
     <string name="explanation">Explanation</string>

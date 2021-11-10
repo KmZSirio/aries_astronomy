@@ -1,10 +1,20 @@
 package com.bustasirio.aries.feature_apod.presentation.apod_detail
 
+import android.app.Activity
+import android.content.Intent
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import com.bustasirio.aries.feature_apod.domain.model.Apod
 
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement.SpaceAround
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -19,6 +29,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -28,14 +39,21 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
+import com.bustasirio.aries.MainActivity
 import com.bustasirio.aries.R
-import com.bustasirio.aries.ui.theme.DarkInformation
-import com.bustasirio.aries.ui.theme.LightInformation
-import com.bustasirio.aries.ui.theme.NotSavedGrey
-import com.bustasirio.aries.ui.theme.SavedRed
+import com.bustasirio.aries.common.fetchMimeTypeFromUrl
+import com.bustasirio.aries.common.getUrlFromApod
+import com.bustasirio.aries.common.util.DownloadFileWorker
+import com.bustasirio.aries.ui.theme.*
 import kotlinx.coroutines.launch
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -68,11 +86,78 @@ fun ApodDetailScreen(
 
     val savedState = viewModel.savedState
 
+    // * Download stuff
+
+    val downloadState = remember { mutableStateOf(false) }
+
+    val imgUrl = getUrlFromApod(apod)
+    val mimeType = fetchMimeTypeFromUrl(imgUrl)
+
+    val context = LocalContext.current
+    val selectedFile = remember { mutableStateOf<ActivityResult?>(null) }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            selectedFile.value = it
+        }
+
+    if (selectedFile.value != null && selectedFile.value?.resultCode == Activity.RESULT_OK) {
+        val uri = selectedFile.value?.data?.data
+        if (uri != null) {
+            val builder = Data.Builder()
+            builder.putString("destination", uri.toString())
+            builder.putString("url", imgUrl)
+            val inputParams = builder.build()
+            val downloadFileWorker = OneTimeWorkRequest.Builder(DownloadFileWorker::class.java)
+                .setInputData(inputParams)
+                .build()
+            val workManager = WorkManager.getInstance(context)
+            workManager.enqueue(downloadFileWorker)
+            val outputWorkInfo: LiveData<WorkInfo> =
+                workManager.getWorkInfoByIdLiveData(downloadFileWorker.id)
+
+            outputWorkInfo.observe(context as MainActivity, Observer {
+
+                when (it.state) {
+                    WorkInfo.State.SUCCEEDED -> {
+                        downloadState.value = false
+                        Toast.makeText(
+                            context,
+                            "Download succeeded!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    WorkInfo.State.FAILED -> {
+                        downloadState.value = false
+                        Toast.makeText(
+                            context,
+                            "Download failed!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    WorkInfo.State.CANCELLED -> {
+                        downloadState.value = false
+                        Toast.makeText(
+                            context,
+                            "Download cancelled!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    else -> {
+                        downloadState.value = true
+                    }
+                }
+            })
+        }
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colors.background)
     ) {
+
+        if (downloadState.value) Downloading()
+
         Column(
             modifier = Modifier
                 .clip(RectangleShape)
@@ -107,9 +192,10 @@ fun ApodDetailScreen(
 
             when (painterState) {
                 is ImagePainter.State.Loading -> {
-                    Box(modifier = Modifier
-                        .requiredHeight(300.dp)
-                        .align(CenterHorizontally)
+                    Box(
+                        modifier = Modifier
+                            .requiredHeight(300.dp)
+                            .align(CenterHorizontally)
                     ) {
                         LinearProgressIndicator(
                             Modifier.align(Alignment.Center)
@@ -191,7 +277,26 @@ fun ApodDetailScreen(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {}) {
+                IconButton(onClick = {
+
+                    val title = apod.title.trim().replace(" ", "_")
+                    if (imgUrl.isNotEmpty() && mimeType?.isNotBlank() == true) {
+
+                        val intent = Intent()
+                        intent.action = Intent.ACTION_CREATE_DOCUMENT
+                        val mimeTypes: Array<String> = arrayOf(mimeType)
+                        intent.type = mimeType
+                        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                        intent.putExtra(Intent.EXTRA_TITLE, title)
+                        launcher.launch(
+                            Intent.createChooser(
+                                intent,
+                                "Select a target to download the file"
+                            )
+                        )
+                    }
+
+                }) {
                     Icon(
                         imageVector = Icons.Default.FileDownload,
                         tint = if (isSystemInDarkTheme()) DarkInformation else LightInformation,
@@ -244,5 +349,40 @@ fun ApodDetailScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
         }
+    }
+}
+
+@Composable
+fun Downloading() {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .zIndex(2f)
+    ) {
+        Card(
+            modifier = Modifier
+                .size(200.dp, 200.dp)
+                .align(Alignment.Center),
+            shape = RoundedCornerShape(16.dp),
+            content = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    CircularProgressIndicator(
+                        color =  if (isSystemInDarkTheme()) DarkInformation else LightInformation,
+                        modifier = Modifier
+                            .size(50.dp)
+                    )
+                    Text(
+                        text = "Downloading...",
+                        color = MaterialTheme.colors.secondary,
+                        style = MaterialTheme.typography.h6
+                    )
+                }
+            }
+        )
     }
 }
